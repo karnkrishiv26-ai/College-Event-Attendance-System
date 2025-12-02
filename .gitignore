@@ -1,0 +1,17 @@
+﻿# Python
+__pycache__/
+*.pyc
+.venv/
+env/
+venv/
+
+# Flask/uploads
+uploads/
+instance/
+*.db
+*.sqlite
+
+# OS/IDE
+.DS_Store
+*.code-workspace
+.vscode/

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="navbar">
+            <h2>Student Dashboard</h2>
+            <div class="nav-right">
+                <span>Welcome, {{ session.name }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+            </div>
+        </nav>
+        
+        <div class="content">
+            <div class="student-info">
+                <h3>Student Information</h3>
+                <p><strong>Student ID:</strong> {{ student.student_id }}</p>
+                <p><strong>Name:</strong> {{ student.name }}</p>
+                <p><strong>Section:</strong> {{ student.section }}</p>
+                <p><strong>Year:</strong> {{ student.year }}</p>
+            </div>
+            
+            <div class="attendance-stats">
+                <h3>Attendance Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h4>Total Classes</h4>
+                        <p class="stat-number">{{ total_classes }}</p>
+                    </div>
+                    <div class="stat-card present">
+                        <h4>Present</h4>
+                        <p class="stat-number">{{ present }}</p>
+                    </div>
+                    <div class="stat-card absent">
+                        <h4>Absent</h4>
+                        <p class="stat-number">{{ absent }}</p>
+                    </div>
+                    <div class="stat-card not-marked">
+                        <h4>Not Marked</h4>
+                        <p class="stat-number">{{ not_marked }}</p>
+                    </div>
+                    <div class="stat-card percentage">
+                        <h4>Attendance %</h4>
+                        <p class="stat-number">{{ attendance_percentage }}%</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="attendance-table">
+                <h3>Attendance Records</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Period</th>
+                            <th>Teacher</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in attendance %}
+                        <tr>
+                            <td>{{ record.date }}</td>
+                            <td>{{ record.period }}</td>
+                            <td>{{ record.teacher_name }}</td>
+                            <td>{{ record.subject }}</td>
+                            <td>
+                                <span class="status-badge status-{{ record.status.lower().replace('.', '-') }}">
+                                    {{ record.status }}
+                                    {% if record.marked_by_club %}
+                                    <span class="club-badge">Club Event</span>
+                                    {% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

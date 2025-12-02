@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VC Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="navbar">
+            <h2>Vice Chancellor Dashboard</h2>
+            <div class="nav-right">
+                <span>Welcome, {{ session.name }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+            </div>
+        </nav>
+        
+        <div class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <div class="vc-section">
+                <h3>Manage Portal Access</h3>
+                <form method="POST" action="{{ url_for('open_portal') }}" class="portal-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="club_id">Select Club:</label>
+                            <select name="club_id" id="club_id" required>
+                                <option value="">Choose a club</option>
+                                {% for club in clubs %}
+                                <option value="{{ club.club_id }}">{{ club.club_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="duration_hours">Duration (hours):</label>
+                            <input type="number" id="duration_hours" name="duration_hours" min="1" max="48" value="24" required>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Open Portal</button>
+                        </div>
+                    </div>
+                </form>
+                
+                <h4>Current Portal Status</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Club Name</th>
+                            <th>Opened At</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for portal in portal_access %}
+                        <tr>
+                            <td>{{ portal.club_name }}</td>
+                            <td>{{ portal.opened_at }}</td>
+                            <td>{{ portal.duration_hours }} hours</td>
+                            <td>
+                                {% if portal.is_active %}
+                                <span class="status-badge status-p">ACTIVE</span>
+                                {% else %}
+                                <span class="status-badge status-a">CLOSED</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if portal.is_active %}
+                                <form method="POST" action="{{ url_for('close_portal', portal_id=portal.portal_id) }}" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm">Close</button>
+                                </form>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="vc-section">
+                <h3>Pending Event Approvals</h3>
+                {% if pending_events %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Club</th>
+                            <th>Event Name</th>
+                            <th>Date</th>
+                            <th>Period</th>
+                            <th>Uploaded At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in pending_events %}
+                        <tr>
+                            <td>{{ event.club_name }}</td>
+                            <td>{{ event.event_name }}</td>
+                            <td>{{ event.event_date }}</td>
+                            <td>{{ event.period }}</td>
+                            <td>{{ event.created_at }}</td>
+                            <td>
+                                <form method="POST" action="{{ url_for('approve_event', event_id=event.event_id) }}" style="display: inline;">
+                                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('reject_event', event_id=event.event_id) }}" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>No pending events for approval.</p>
+                {% endif %}
+            </div>
+            
+            <div class="vc-section">
+                <h3>Registered Clubs</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Club ID</th>
+                            <th>Club Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for club in clubs %}
+                        <tr>
+                            <td>{{ club.club_id }}</td>
+                            <td>{{ club.club_name }}</td>
+                            <td>
+                                {% if club.is_registered %}
+                                <span class="status-badge status-p">Registered</span>
+                                {% else %}
+                                <span class="status-badge status-a">Not Registered</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

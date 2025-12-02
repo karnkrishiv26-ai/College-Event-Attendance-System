@@ -1,0 +1,62 @@
+<!-- templates/teacher_portal.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Teacher Portal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="navbar">
+    <div>QUMS | Teacher</div>
+    <div>
+      <span>{{ session.name }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+    </div>
+  </div>
+  <div class="container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}<div class="alert alert-success">{{ messages[0] }}</div>{% endif %}
+    {% endwith %}
+    <div class="section-card">
+      <h3>Mark Attendance</h3>
+      <form method="post" action="{{ url_for('teacher_portal') }}">
+        <div class="form-row">
+          <label>Subject</label>
+          <select name="subject_code" required>
+            <option value="">--select--</option>
+            {% for s in subjects %}
+              <option value="{{ s['subject_code'] }}">{{ s['subject_name'] }} ({{ s['subject_code'] }})</option>
+            {% endfor %}
+          </select>
+          <label>Period</label>
+          <input name="period" placeholder="P1" required>
+          <label>Date</label>
+          <input name="date" type="date" required value="{{ ('' ) }}">
+        </div>
+        <table>
+          <thead><tr><th>#</th><th>Student ID</th><th>Name</th><th>Section</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for s in students %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ s['student_id'] }}</td>
+                <td>{{ s['name'] }}</td>
+                <td>{{ s['section'] }}</td>
+                <td>
+                  <select name="attendance_{{ s['student_id'] }}">
+                    <option value="N.M.">N.M.</option>
+                    <option value="P">P</option>
+                    <option value="A">A</option>
+                  </select>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <button class="btn btn-primary" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

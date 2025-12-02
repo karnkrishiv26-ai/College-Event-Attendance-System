@@ -1,0 +1,69 @@
+<!-- templates/club_portal.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Club Portal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="navbar">
+    <div>QUMS | Club Portal</div>
+    <div>
+      <span>{{ session.name }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+    </div>
+  </div>
+  <div class="container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}<div class="alert alert-info">{{ messages[0] }}</div>{% endif %}
+    {% endwith %}
+    {% if club %}
+      <div class="info-card"><h3>{{ club['club_name'] }}</h3><p>Status: {{ club['status'] }}</p></div>
+
+      <div class="section-card">
+        <h3>Active Approval Windows</h3>
+        {% if active_approvals %}
+          {% for a in active_approvals %}
+            <div class="approval-card">
+              <strong>{{ a['event_name'] }}</strong><br>
+              Window: {{ a['start_time'] }} — {{ a['end_time'] }}
+              <form method="post" enctype="multipart/form-data" style="margin-top:10px;">
+                <input type="hidden" name="approval_id" value="{{ a['id'] }}">
+                <input type="hidden" name="event_name" value="{{ a['event_name'] }}">
+                <label>Upload Excel/CSV</label>
+                <input type="file" name="file" accept=".xlsx,.xls,.csv" required>
+                <label>Period (optional)</label>
+                <input name="period" value="Event">
+                <button class="btn btn-success" type="submit">Upload & Mark</button>
+              </form>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="alert alert-warning">No active approval windows — ask VC to create one.</div>
+        {% endif %}
+      </div>
+
+      <div class="section-card">
+        <h3>Approval History</h3>
+        <table>
+          <thead><tr><th>Event</th><th>Start</th><th>End</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for r in approvals %}
+              <tr>
+                <td>{{ r['event_name'] }}</td>
+                <td>{{ r['start_time'] }}</td>
+                <td>{{ r['end_time'] }}</td>
+                <td>{{ r['status'] }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    {% else %}
+      <div class="alert alert-error">This account is not associated with any club.</div>
+    {% endif %}
+  </div>
+</body>
+</html>

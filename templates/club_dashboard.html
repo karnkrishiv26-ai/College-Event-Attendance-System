@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="navbar">
+            <h2>Club Dashboard</h2>
+            <div class="nav-right">
+                <span>Welcome, {{ session.name }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+            </div>
+        </nav>
+        
+        <div class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <div class="club-info">
+                <h3>Club Information</h3>
+                <p><strong>Club ID:</strong> {{ club.club_id }}</p>
+                <p><strong>Club Name:</strong> {{ club.club_name }}</p>
+                <p><strong>Status:</strong> <span class="status-badge status-p">Registered</span></p>
+            </div>
+            
+            <div class="portal-status">
+                <h3>Portal Access Status</h3>
+                {% if portal_status %}
+                <div class="alert alert-success">
+                    <p><strong>Portal is OPEN</strong></p>
+                    <p>Opened at: {{ portal_status.opened_at }}</p>
+                    <p>Duration: {{ portal_status.duration_hours }} hours</p>
+                    <p>You can now upload attendance files.</p>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <p><strong>Portal is CLOSED</strong></p>
+                    <p>Please contact the Vice Chancellor to open portal access.</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if portal_status %}
+            <div class="upload-section">
+                <h3>Upload Event Attendance</h3>
+                <form method="POST" action="{{ url_for('upload_excel') }}" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="event_name">Event Name:</label>
+                        <input type="text" id="event_name" name="event_name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event_date">Event Date:</label>
+                        <input type="date" id="event_date" name="event_date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="period">Period to Mark Attendance:</label>
+                        <select name="period" id="period" required>
+                            <option value="1">Period 1</option>
+                            <option value="2">Period 2</option>
+                            <option value="3">Period 3</option>
+                            <option value="4">Period 4</option>
+                            <option value="5">Period 5</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="excel_file">Upload Excel File:</label>
+                        <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls" required>
+                        <small>File should contain columns: Name, ID, Section, Year</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Upload Attendance</button>
+                </form>
+                
+                <div class="excel-format-info">
+                    <h4>Excel File Format:</h4>
+                    <table class="sample-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>ID</th>
+                                <th>Section</th>
+                                <th>Year</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Rahul Kumar</td>
+                                <td>2021001</td>
+                                <td>A</td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <td>Priya Sharma</td>
+                                <td>2021002</td>
+                                <td>A</td>
+                                <td>3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="events-list">
+                <h3>Event History</h3>
+                {% if events %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Date</th>
+                            <th>Period</th>
+                            <th>Status</th>
+                            <th>Uploaded At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                        <tr>
+                            <td>{{ event.event_name }}</td>
+                            <td>{{ event.event_date }}</td>
+                            <td>{{ event.period }}</td>
+                            <td>
+                                <span class="status-badge status-{{ event.status }}">
+                                    {{ event.status|upper }}
+                                </span>
+                            </td>
+                            <td>{{ event.created_at }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>No events uploaded yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

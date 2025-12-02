@@ -1,0 +1,96 @@
+<!-- templates/vc_portal.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>VC Portal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="navbar">
+    <div>QUMS | VC</div>
+    <div>
+      <span>{{ session.name }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}<div class="alert alert-success">{{ messages[0] }}</div>{% endif %}
+    {% endwith %}
+
+    <div class="section-card">
+      <h3>Registered Clubs</h3>
+      <table>
+        <thead><tr><th>Club</th><th>Leader</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for c in clubs %}
+            <tr>
+              <td>{{ c['club_name'] }}</td>
+              <td>{{ c['leader_username'] }}</td>
+              <td>{{ c['status'] }}</td>
+              <td>
+                {% if c['status']=='pending' %}
+                  <form method="post"><input type="hidden" name="action" value="approve_club"><input type="hidden" name="club_id" value="{{ c['id'] }}"><button class="btn btn-small btn-success" type="submit">Approve</button></form>
+                {% else %}
+                  ✓ Approved
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-card">
+      <h3>Create Approval Window</h3>
+      <form method="post">
+        <input type="hidden" name="action" value="create_approval">
+        <label>Club</label>
+        <select name="club_id" required>
+          <option value="">--select--</option>
+          {% for c in clubs if c['status']=='approved' %}
+            <option value="{{ c['id'] }}">{{ c['club_name'] }}</option>
+          {% endfor %}
+        </select>
+        <label>Event Name</label>
+        <input name="event_name" required>
+        <label>Start (local)</label>
+        <input type="datetime-local" name="start_time" required>
+        <label>End (local)</label>
+        <input type="datetime-local" name="end_time" required>
+        <button class="btn btn-primary" type="submit">Create</button>
+      </form>
+    </div>
+
+    <div class="section-card">
+      <h3>Approval Windows</h3>
+      <table>
+        <thead><tr><th>Club</th><th>Event</th><th>Start</th><th>End</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for a in approvals %}
+            <tr>
+              <td>{{ a['club_name'] }}</td>
+              <td>{{ a['event_name'] }}</td>
+              <td>{{ a['start_time'] }}</td>
+              <td>{{ a['end_time'] }}</td>
+              <td>{{ a['status'] }}</td>
+              <td>
+                {% if a['status']=='approved' %}
+                  <form method="post"><input type="hidden" name="action" value="revoke_approval"><input type="hidden" name="approval_id" value="{{ a['id'] }}"><button class="btn btn-small btn-danger" type="submit">Revoke</button></form>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-card">
+      <h4>Statistics</h4>
+      <div>Total present: {{ stats.present }} | Absent: {{ stats.absent }} | Event-marked: {{ stats.event_marked }}</div>
+    </div>
+  </div>
+</body>
+</html>

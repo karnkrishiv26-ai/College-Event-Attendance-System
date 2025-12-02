@@ -1,0 +1,51 @@
+<!-- templates/student_dashboard.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="navbar">
+    <div>🎓 QUMS | Student</div>
+    <div>
+      <span>{{ session.name }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+    </div>
+  </div>
+  <div class="container">
+    <div class="info-card">
+      <h2>{{ student['name'] }}</h2>
+      <p>ID: {{ student['student_id'] }} | Section: {{ student['section'] }}</p>
+    </div>
+
+    <div class="section-card">
+      <h3>Today's Attendance</h3>
+      <table>
+        <thead><tr><th>Period</th><th>Subject</th><th>Code</th><th>Marked By</th><th>Status</th><th>Event</th></tr></thead>
+        <tbody>
+          {% if today_attendance %}
+            {% for r in today_attendance %}
+              <tr>
+                <td>{{ r['period'] }}</td>
+                <td>{{ r['subject_name'] or '-' }}</td>
+                <td>{{ r['subject_code'] }}</td>
+                <td>{{ r['marked_by'] or '-' }}</td>
+                <td>{{ r['status'] }}</td>
+                <td>{{ r['event_name'] or '-' }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr><td colspan="6">No attendance for today</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-card">
+      <strong>Total Attendance:</strong> {{ attendance_percent }}%
+    </div>
+  </div>
+</body>
+</html>
